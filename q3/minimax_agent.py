@@ -3,7 +3,6 @@ import math
 def minimax(game, depth, maximizing_player, alpha=-math.inf, beta=math.inf):
     """
     Minimax algorithm with Alpha-Beta Pruning.
-    
     EXAM PSEUDOCODE MAPPING:
     function minimax(node, depth, maximizingPlayer)
         1. TERMINATION (BASE) CONDITIONS:
@@ -27,12 +26,17 @@ def minimax(game, depth, maximizing_player, alpha=-math.inf, beta=math.inf):
                    beta := min(beta, value)
                    if beta <= alpha: break (* Alpha Cutoff *)
                return value
+    
+    RELATION TO THEORY PSEUDOCODE:
+    This function combines 'MAX-VALUE' and 'MIN-VALUE' into one function 
+    using the 'maximizing_player' boolean flag.
+    
+    - if maximizing_player is True: Acts as MAX-VALUE(game, state)
+    - if maximizing_player is False: Acts as MIN-VALUE(game, state)
     """
     
     # --- 1. TERMINATION (BASE) CONDITIONS ---
-    # The recursion stops if someone has won or the board is full (tie).
-    # We return a score: +10 for AI win, -10 for Human win, 0 for Tie.
-    # We add/subtract 'num_empty_squares' to prefer winning SOONER.
+    # Equivalent to: if game.IS-TERMINAL(state) then return game.UTILITY(state, player)
     if game.check_win(game.ai):
         return 1 * (game.num_empty_squares() + 1)
     elif game.check_win(game.human):
@@ -40,46 +44,48 @@ def minimax(game, depth, maximizing_player, alpha=-math.inf, beta=math.inf):
     elif not game.empty_squares():
         return 0
 
-    # --- 2. RECURSIVE STEP ---
+    # --- 2. RECURSIVE STEP (MAX-VALUE) ---
     if maximizing_player:
         max_eval = -math.inf
         for move in game.available_moves():
-            # Simulate the move
+            # Simulate (game.RESULT)
             game.board[move] = game.ai
             
-            # Recursive call: Now it's the minimizing player's turn
+            # Recursive call (MIN-VALUE)
             eval = minimax(game, depth + 1, False, alpha, beta)
             
-            # Undo the move (Backtracking)
+            # Backtrack
             game.board[move] = ' ' 
             
-            # Maximize the result
+            # Logic: v = max(v, v2)
             max_eval = max(max_eval, eval)
             
-            # Alpha-Beta Pruning
+            # Alpha-Beta
             alpha = max(alpha, eval)
             if beta <= alpha:
-                break # Beta Cutoff: Prune the rest of the branches
+                break 
         return max_eval
+    
+    # --- 3. RECURSIVE STEP (MIN-VALUE) ---
     else:
         min_eval = math.inf
         for move in game.available_moves():
-            # Simulate the move
+            # Simulate (game.RESULT)
             game.board[move] = game.human
             
-            # Recursive call: Now it's the maximizing player's turn
+            # Recursive call (MAX-VALUE)
             eval = minimax(game, depth + 1, True, alpha, beta)
             
-            # Undo the move (Backtracking)
+            # Backtrack
             game.board[move] = ' ' 
             
-            # Minimize the result
+            # Logic: v = min(v, v2)
             min_eval = min(min_eval, eval)
             
-            # Alpha-Beta Pruning
+            # Alpha-Beta
             beta = min(beta, eval)
             if beta <= alpha:
-                break # Alpha Cutoff: Prune the rest of the branches
+                break 
         return min_eval
 
 def get_best_move(game):
