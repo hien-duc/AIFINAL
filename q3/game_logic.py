@@ -22,6 +22,10 @@ class TicTacToe:
             return True
         return False
 
+    # if using minimax_agent old comment this function
+    def undo_move(self, square):
+        self.board[square] = ' '
+
     def check_win(self, letter):
         # Rows
         for i in range(0, 9, 3):
